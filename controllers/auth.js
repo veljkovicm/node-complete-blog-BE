@@ -65,7 +65,7 @@ exports.login = (req, res, next) => {
         'somesupersecretsecretkey',
         { expiresIn: '1h' }
       );
-      res.status(200).json({ token: token, userId: loadedUser._id.toString() });
+      res.status(200).json({ token: token, userId: loadedUser._id.toString(), email: loadedUser.email });
     })
     .catch(err => {
       if(!err.statusCode) {
