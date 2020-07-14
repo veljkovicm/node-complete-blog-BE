@@ -57,7 +57,7 @@ module.exports = {
       'somesupersecretsecretkey',
       { expiresIn: '1h' }
     );
-    return { token: token, userId: user._id.toString() };
+    return { token: token, userId: user._id.toString(), email: user.email };
   },
   createPost: async function({ postInput }, req) {
     if (!req.isAuth) {
