@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -47,6 +48,22 @@ app.use((req, res, next) => {
 
 app.use(auth);
 
+app.put('/post-image', (req, res, next) => {
+  if (!req.isAuth) {
+    throw new Error('Not authenticated!');
+  }
+  if (!req.file) {
+    return res.status(200).json({ message: 'No file provided' });
+  }
+  if (req.body.oldPath) {
+    clearImage(req.body.oldPath);
+  }
+  // Windows; Might not work with this on Mac
+  const newImageUrl =  req.file.path.replace('\\', '/');
+
+  return res.status(201).json({ message: 'File stored.', filePath: newImageUrl });
+});
+
 app.use('/graphql', graphqlHTTP({
   schema: graphqlSchema,
   rootValue: graphqlResolver,
@@ -79,3 +96,8 @@ mongoose.connect(config.MONGODB_URI)
   app.listen(8080);
 })
 .catch(err => console.log(err));
+
+const clearImage = filePath => {
+  filePath = path.join(__dirname, '..', filePath);
+  fs.unlink(filePath, err => console.log(err));
+}
