@@ -1,9 +1,11 @@
+// Sockets deleted. check 'Removes routes commit (7de580db96726e172eff42508d96d85d6c32e21c)
+
 const fs = require('fs');
 const path = require('path');
 
-const { validationResult } = require('express-validator/check');
+const { validationResult } = require('express-validator');
 
-const io = require('../socket');
+// const io = require('../socket');
 const Post = require('../models/post');
 const User = require('../models/user');
 
@@ -52,20 +54,20 @@ exports.createPost = async (req, res, next) => {
     imageUrl: imageUrl,
   });
   try {
-    await post.save()
-    const user = await User.findById(req.userId); 
+    await post.save();
+    const user = await User.findById(req.userId);
     user.posts.push(post);
-    await user.save();
-    io.getIO().emit('posts', {
-      action: 'create',
-      post: {...post._doc, creator: {_id: req.userId, name: user.name}}
-  });
+    const savedUser = await user.save();
+    // io.getIO().emit('posts', {
+    //   action: 'create',
+    //   post: {...post._doc, creator: {_id: req.userId, name: user.name}}
+    // });
     res.status(201).json({
       message: 'Post created successfully!',
       post: post,
       creator: { _id: user._id, name: user.name }
     });
-      
+    return savedUser;
   } catch (err) {
     if(!err.statusCode) {
       err.statusCode = 500;
@@ -130,7 +132,7 @@ exports.updatePost = async (req, res, next) => {
     post.imageUrl = imageUrl;
     post.content = content;
     const result = await post.save();
-    io.getIO().emit('posts', { action: 'update', post: result })
+    // io.getIO().emit('posts', { action: 'update', post: result })
     res.status(200).json({ message: 'Post updated!', post: result })
   } catch (err) {
     if(!err.statusCode) {
@@ -161,7 +163,7 @@ exports.deletePost = async (req, res, next) => {
     user.posts.pull(postId);
     await user.save();
 
-    io.getIO().emit('posts', { action: 'delete', post: postId });
+    // io.getIO().emit('posts', { action: 'delete', post: postId });
     res.status(200).json({ message: 'Deleted post.' });
   } catch (err) {
       if(!err.statusCode) {
